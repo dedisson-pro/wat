@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+backend/uploads/
+*.db
+backend/test_camera.py
