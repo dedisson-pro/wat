@@ -1,0 +1,10 @@
+flask
+flask-cors
+opencv-python-headless
+requests
+groq
+pillow
+pymysql
+cryptography
+gunicorn
+python-dotenv

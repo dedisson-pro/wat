@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#2d6a4f"/>
+  <title>WhatAPlant</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="leaf-icon">🌿</span>
+      <span>WhatAPlant</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="scanner">Scanner</button>
+      <button class="nav-tab" data-tab="history">Historique</button>
+      <button class="nav-tab" data-tab="dashboard">Dashboard</button>
+    </div>
+  </nav>
+
+  <!-- SCANNER TAB -->
+  <section id="tab-scanner" class="tab-content active">
+    <div class="scanner-hero">
+      <h1>Identifiez votre plante</h1>
+      <p>Prenez une photo ou importez une image pour obtenir une analyse complète</p>
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-inner" id="uploadInner">
+        <span class="upload-icon">📷</span>
+        <p>Glissez une image ici ou cliquez pour choisir</p>
+        <div class="upload-btns">
+          <button class="btn btn-primary" id="btnCamera">📸 Caméra</button>
+          <button class="btn btn-secondary" id="btnGallery">🖼️ Galerie</button>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" hidden/>
+      </div>
+      <div class="preview-container hidden" id="previewContainer">
+        <img id="previewImg" alt="Aperçu de la plante"/>
+        <div class="preview-actions">
+          <button class="btn btn-primary" id="btnAnalyze">🔍 Analyser</button>
+          <button class="btn btn-ghost" id="btnReset">✕ Changer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p id="loadingText">Analyse en cours...</p>
+        <div class="loading-steps">
+          <span class="step" id="step1">🔬 Traitement OpenCV</span>
+          <span class="step" id="step2">🌱 Identification PlantNet</span>
+          <span class="step" id="step3">🤖 Analyse IA Groq</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-card hidden" id="resultCard">
+      <div class="result-header">
+        <img id="resultImg" alt="Plante analysée"/>
+        <div class="result-identity">
+          <h2 id="resultCommonName"></h2>
+          <p class="scientific" id="resultScientificName"></p>
+          <p class="family" id="resultFamily"></p>
+          <div class="confidence-bar">
+            <span>Confiance</span>
+            <div class="bar-track"><div class="bar-fill" id="confidenceBar"></div></div>
+            <span id="confidenceVal"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="badges-row" id="badgesRow"></div>
+
+      <div class="result-sections">
+        <div class="result-section">
+          <h3>🌿 Santé</h3>
+          <p id="healthStatus"></p>
+        </div>
+        <div class="result-section">
+          <h3>🍽️ Comestibilité</h3>
+          <p id="edibleDetails"></p>
+          <div id="recipeImages" class="recipe-images"></div>
+        </div>
+        <div class="result-section">
+          <h3>💊 Propriétés médicinales</h3>
+          <p id="medicinalDetails"></p>
+        </div>
+        <div class="result-section">
+          <h3>⚠️ Toxicité</h3>
+          <p id="toxicDetails"></p>
+        </div>
+        <div class="result-section">
+          <h3>🌍 Impact environnemental</h3>
+          <p id="envImpact"></p>
+        </div>
+      </div>
+
+      <!-- CHAT IA -->
+      <div class="chat-section">
+        <h3>💬 Poser une question à l'agent IA</h3>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Ex: Comment préparer une décoction ?"/>
+          <button class="btn btn-primary" id="btnSend">Envoyer</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY TAB -->
+  <section id="tab-history" class="tab-content">
+    <div class="page-header">
+      <h2>Historique des scans</h2>
+      <input type="text" id="historySearch" placeholder="Rechercher une plante..."/>
+    </div>
+    <div class="history-grid" id="historyGrid">
+      <div class="empty-state">Aucun scan pour le moment</div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD TAB -->
+  <section id="tab-dashboard" class="tab-content">
+    <div class="page-header"><h2>Tableau de bord</h2></div>
+    <div class="stats-row">
+      <div class="stat-card"><span class="stat-num" id="statTotal">0</span><span>Scans total</span></div>
+      <div class="stat-card edible"><span class="stat-num" id="statEdible">0</span><span>Comestibles</span></div>
+      <div class="stat-card medicinal"><span class="stat-num" id="statMedicinal">0</span><span>Médicinales</span></div>
+      <div class="stat-card toxic"><span class="stat-num" id="statToxic">0</span><span>Toxiques</span></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Répartition par catégorie</h3>
+        <canvas id="chartCategories"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Activité (7 derniers jours)</h3>
+        <canvas id="chartActivity"></canvas>
+      </div>
+      <div class="chart-card full">
+        <h3>Plantes les plus scannées</h3>
+        <canvas id="chartTopPlants"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/app.js"></script>
+  <script src="js/scanner.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
